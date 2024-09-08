@@ -1,5 +1,6 @@
 import './App.css';
 import CustomerSupport from './components/CustomerSupport/customerSupport';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
   return (

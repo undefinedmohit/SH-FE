@@ -1,16 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter, Form, FormGroup, Label, Input } from 'reactstrap';
 import './customerSupport.css';
 import customerSupportPicture from '../../assets/customer_support_staff.jpg';
 
 const CustomerSupport = () => {
   const [operatingHours, setOperatingHours] = useState([]);
   const [specialHours, setSpecialHours] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({
+  const [operatingModal, setOperatingModal] = useState(false);
+  const [specialModal, setSpecialModal] = useState(false);
+  const [newOperatingHour, setNewOperatingHour] = useState({
     dayOfWeek: '',
     open: '',
-    close: '',
+    close: ''
+  });
+  const [newSpecialHour, setNewSpecialHour] = useState({
+    open: '',
+    close: ''
   });
 
   useEffect(() => {
@@ -23,38 +29,49 @@ const CustomerSupport = () => {
       .catch(error => console.error('Error fetching special hours:', error));
   }, []);
 
-  const handleOpenModal = () => {
-    setShowModal(true);
+  const toggleOperatingModal = () => setOperatingModal(!operatingModal);
+  const toggleSpecialModal = () => setSpecialModal(!specialModal);
+
+  const handleOperatingHourChange = (e) => {
+    setNewOperatingHour({ ...newOperatingHour, [e.target.name]: e.target.value });
   };
 
-  const handleCloseModal = () => {
-    setShowModal(false);
+  const handleSpecialHourChange = (e) => {
+    setNewSpecialHour({ ...newSpecialHour, [e.target.name]: e.target.value });
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    axios.post('http://localhost:8080/hours/operating', formData)
+  const submitOperatingHour = () => {
+    // Handle the submission of the new operating hour
+    axios.post('http://localhost:8080/hours/operating', newOperatingHour)
       .then(response => {
         setOperatingHours([...operatingHours, response.data]);
-        handleCloseModal();
+        toggleOperatingModal();
       })
-      .catch(error => console.error('Error adding operating hours:', error));
+      .catch(error => console.error('Error adding operating hour:', error));
+  };
+
+  const submitSpecialHour = () => {
+    // Handle the submission of the new special hour
+    axios.post('http://localhost:8080/hours/special', newSpecialHour)
+      .then(response => {
+        setSpecialHours([...specialHours, response.data]);
+        toggleSpecialModal();
+      })
+      .catch(error => console.error('Error adding special hour:', error));
   };
 
   return (
+
     <div className="customer-support-container">
+      <div className="d-flex justify-content-between">
+        <Button color="danger" className="col-md-6" onClick={toggleSpecialModal}>Add Special Hours</Button>
+        <Button color="primary" className="col-md-6" onClick={toggleOperatingModal}>Add Operating Hours</Button>
+      </div>
       <div className="customer-support-section">
         <img src={customerSupportPicture} alt="Customer Support" className="customer-support" />
         <h2>Questions?</h2>
         <p>Our Customer Support will be opening late today. We apologize for any inconvenience.</p>
       </div>
-
       <div className="contact-methods">
         <div className="contact-method">
           <i className="fas fa-phone"></i>
@@ -79,17 +96,22 @@ const CustomerSupport = () => {
       </div>
 
       <div className="hours-section">
-        <h3>Special Hours</h3>
+        <h4>Special Hours</h4>
         {specialHours.length > 0 ? (
-          <p>{specialHours[0].open} - {specialHours[0].close}</p>
+          specialHours.map((hour, index) => (
+            <p key={index} style={{ color: '#fe3616' }}>{hour.open} - {hour.close}</p>
+          ))
         ) : (
           <p>No special hours available.</p>
         )}
-        <h3>Operating Hours</h3>
+
+
+        <h4>Operating Hours</h4>
         {operatingHours.length > 0 ? (
           operatingHours.map((hours, index) => (
             <div key={index}>
-              <p>{hours.dayOfWeek}: {hours.open} - {hours.close}</p>
+              <p style={{fontWeight: '700'}}>{hours.dayOfWeek}</p>
+                <p>{hours.open} - {hours.close}</p>
             </div>
           ))
         ) : (
@@ -97,55 +119,49 @@ const CustomerSupport = () => {
         )}
       </div>
 
+      <Modal isOpen={operatingModal} toggle={toggleOperatingModal}>
+        <ModalHeader toggle={toggleOperatingModal}>Add Operating Hours</ModalHeader>
+        <ModalBody>
+          <Form>
+            <FormGroup>
+              <Label for="dayOfWeek">Days of the Week</Label>
+              <Input type="text" name="dayOfWeek" id="dayOfWeek" placeholder="Enter Days of the Week" value={newOperatingHour.dayOfWeek} onChange={handleOperatingHourChange} />
+            </FormGroup>
+            <FormGroup>
+              <Label for="open">Open Time</Label>
+              <Input type="text" name="open" id="open" placeholder="Enter opening time" value={newOperatingHour.open} onChange={handleOperatingHourChange} />
+            </FormGroup>
+            <FormGroup>
+              <Label for="close">Close Time</Label>
+              <Input type="text" name="close" id="close" placeholder="Enter closing time" value={newOperatingHour.close} onChange={handleOperatingHourChange} />
+            </FormGroup>
+          </Form>
+        </ModalBody>
+        <ModalFooter>
+          <Button color="primary" onClick={submitOperatingHour}>Save</Button>{' '}
+          <Button color="secondary" onClick={toggleOperatingModal}>Cancel</Button>
+        </ModalFooter>
+      </Modal>
 
-      <button className="add-hours-btn" onClick={handleOpenModal}>
-        Add Operating Hours
-      </button>
-
-      {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h3>Add Operating Hours</h3>
-            <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label htmlFor="dayOfWeek">Day of Week:</label>
-                <input
-                  type="text"
-                  id="dayOfWeek"
-                  name="dayOfWeek"
-                  value={formData.dayOfWeek}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="open">Open Time:</label>
-                <input
-                  type="text"
-                  id="open"
-                  name="open"
-                  value={formData.open}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="close">Close Time:</label>
-                <input
-                  type="text"
-                  id="close"
-                  name="close"
-                  value={formData.close}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <button type="submit" className="submit-btn">Submit</button>
-              <button type="button" className="close-btn" onClick={handleCloseModal}>Cancel</button>
-            </form>
-          </div>
-        </div>
-      )}
+      <Modal isOpen={specialModal} toggle={toggleSpecialModal}>
+        <ModalHeader toggle={toggleSpecialModal}>Add Special Hours</ModalHeader>
+        <ModalBody>
+          <Form>
+            <FormGroup>
+              <Label for="open">Open Time</Label>
+              <Input type="text" name="open" id="open" placeholder="Enter opening time" value={newSpecialHour.open} onChange={handleSpecialHourChange} />
+            </FormGroup>
+            <FormGroup>
+              <Label for="close">Close Time</Label>
+              <Input type="text" name="close" id="close" placeholder="Enter closing time" value={newSpecialHour.close} onChange={handleSpecialHourChange} />
+            </FormGroup>
+          </Form>
+        </ModalBody>
+        <ModalFooter>
+          <Button color="primary" onClick={submitSpecialHour}>Save</Button>{' '}
+          <Button color="secondary" onClick={toggleSpecialModal}>Cancel</Button>
+        </ModalFooter>
+      </Modal>
     </div>
   );
 };
