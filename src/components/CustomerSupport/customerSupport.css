@@ -1,0 +1,58 @@
+.customer-support-container {
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+    margin: auto;
+    padding: 20px;
+    border-radius: 8px;
+  }
+  
+  .contact-section {
+    background-color: #fde5e5;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+  }
+  
+  .customer-support{
+    margin-top: 20px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+  }
+  
+  .contact-methods {
+    padding: 20px;
+    background-color: #eff5fd;
+  }
+  
+  .contact-method {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+  }
+  
+  .contact-method i {
+    margin-right: 10px;
+  }
+  
+  .availability {
+    color: green;
+    font-size: 14px;
+  }
+  
+  .hours-section {
+    background-color: #fde5e5;
+    border-radius: 0px 0px 8px 8px;
+  }
+  
+  .hours-section h3 {
+    color: #fe3616;
+    margin-bottom: 10px;
+  }
+.customer-support-section {
+  background-color: #fde5e5;
+  padding: 20px;
+}
+  
